@@ -1,3 +1,6 @@
+# firmware ignores
+firmware/build/
+
 # Kicad .gitignore
 # Temporary files
 *.000
