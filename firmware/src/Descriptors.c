@@ -44,24 +44,24 @@
  */
 const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
-	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
+    .Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
-	.USBSpecification       = VERSION_BCD(2,0,0),
-	.Class                  = USB_CSCP_NoDeviceClass,
-	.SubClass               = USB_CSCP_NoDeviceSubclass,
-	.Protocol               = USB_CSCP_NoDeviceProtocol,
+    .USBSpecification       = VERSION_BCD(2,0,0),
+    .Class                  = USB_CSCP_NoDeviceClass,
+    .SubClass               = USB_CSCP_NoDeviceSubclass,
+    .Protocol               = USB_CSCP_NoDeviceProtocol,
 
-	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
+    .Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
-	.VendorID               = 0x03EB,
-	.ProductID              = 0x204F,
-	.ReleaseNumber          = VERSION_BCD(0,0,2),
+    .VendorID               = 0x03EB,
+    .ProductID              = 0x204F,
+    .ReleaseNumber          = VERSION_BCD(0,0,2),
 
-	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
-	.ProductStrIndex        = STRING_ID_Product,
-	.SerialNumStrIndex      = NO_DESCRIPTOR,
+    .ManufacturerStrIndex   = STRING_ID_Manufacturer,
+    .ProductStrIndex        = STRING_ID_Product,
+    .SerialNumStrIndex      = NO_DESCRIPTOR,
 
-	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
+    .NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
 
 /** Configuration descriptor structure. This descriptor, located in FLASH memory, describes the usage
@@ -71,36 +71,36 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
  */
 const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 {
-	.Config =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
+    .Config =
+        {
+            .Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
-			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-			.TotalInterfaces        = 1,
+            .TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
+            .TotalInterfaces        = 1,
 
-			.ConfigurationNumber    = 1,
-			.ConfigurationStrIndex  = NO_DESCRIPTOR,
+            .ConfigurationNumber    = 1,
+            .ConfigurationStrIndex  = NO_DESCRIPTOR,
 
-			.ConfigAttributes       = (USB_CONFIG_ATTR_RESERVED | USB_CONFIG_ATTR_SELFPOWERED),
+            .ConfigAttributes       = (USB_CONFIG_ATTR_RESERVED | USB_CONFIG_ATTR_SELFPOWERED),
 
-			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
-		},
+            .MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
+        },
 
-	.Default_Interface =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
+    .Default_Interface =
+        {
+            .Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
-			.InterfaceNumber        = INTERFACE_ID_Default,
-			.AlternateSetting       = 0x00,
+            .InterfaceNumber        = INTERFACE_ID_Default,
+            .AlternateSetting       = 0x00,
 
-			.TotalEndpoints         = 0,
+            .TotalEndpoints         = 0,
 
-			.Class                  = USB_CSCP_VendorSpecificClass,
-			.SubClass               = USB_CSCP_VendorSpecificSubclass,
-			.Protocol               = USB_CSCP_VendorSpecificProtocol,
+            .Class                  = USB_CSCP_VendorSpecificClass,
+            .SubClass               = USB_CSCP_VendorSpecificSubclass,
+            .Protocol               = USB_CSCP_VendorSpecificProtocol,
 
-			.InterfaceStrIndex      = NO_DESCRIPTOR
-		},
+            .InterfaceStrIndex      = NO_DESCRIPTOR
+        },
 };
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -131,42 +131,42 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
                                     const uint16_t wIndex,
                                     const void** const DescriptorAddress)
 {
-	const uint8_t  DescriptorType   = (wValue >> 8);
-	const uint8_t  DescriptorNumber = (wValue & 0xFF);
+    const uint8_t  DescriptorType   = (wValue >> 8);
+    const uint8_t  DescriptorNumber = (wValue & 0xFF);
 
-	const void* Address = NULL;
-	uint16_t    Size    = NO_DESCRIPTOR;
+    const void* Address = NULL;
+    uint16_t    Size    = NO_DESCRIPTOR;
 
-	switch (DescriptorType)
-	{
-		case DTYPE_Device:
-			Address = &DeviceDescriptor;
-			Size    = sizeof(USB_Descriptor_Device_t);
-			break;
-		case DTYPE_Configuration:
-			Address = &ConfigurationDescriptor;
-			Size    = sizeof(USB_Descriptor_Configuration_t);
-			break;
-		case DTYPE_String:
-			switch (DescriptorNumber)
-			{
-				case STRING_ID_Language:
-					Address = &LanguageString;
-					Size    = pgm_read_byte(&LanguageString.Header.Size);
-					break;
-				case STRING_ID_Manufacturer:
-					Address = &ManufacturerString;
-					Size    = pgm_read_byte(&ManufacturerString.Header.Size);
-					break;
-				case STRING_ID_Product:
-					Address = &ProductString;
-					Size    = pgm_read_byte(&ProductString.Header.Size);
-					break;
-			}
-			break;
-	}
+    switch (DescriptorType)
+    {
+        case DTYPE_Device:
+            Address = &DeviceDescriptor;
+            Size    = sizeof(USB_Descriptor_Device_t);
+            break;
+        case DTYPE_Configuration:
+            Address = &ConfigurationDescriptor;
+            Size    = sizeof(USB_Descriptor_Configuration_t);
+            break;
+        case DTYPE_String:
+            switch (DescriptorNumber)
+            {
+                case STRING_ID_Language:
+                    Address = &LanguageString;
+                    Size    = pgm_read_byte(&LanguageString.Header.Size);
+                    break;
+                case STRING_ID_Manufacturer:
+                    Address = &ManufacturerString;
+                    Size    = pgm_read_byte(&ManufacturerString.Header.Size);
+                    break;
+                case STRING_ID_Product:
+                    Address = &ProductString;
+                    Size    = pgm_read_byte(&ProductString.Header.Size);
+                    break;
+            }
+            break;
+    }
 
-	*DescriptorAddress = Address;
-	return Size;
+    *DescriptorAddress = Address;
+    return Size;
 }
 
