@@ -19,22 +19,22 @@ void SetupHardware(void)
 	clock_prescale_set(clock_div_1);
 
 	// Initialize SPI
-    DDRB = 0b00110111;
-    PORTB = (1 << 4);
-    SPCR = 0b01010000;
+	DDRB = 0b00110111;
+	PORTB = (1 << 4);
+	SPCR = 0b01010000;
 
-    // Reset display
-    PORTB &= ~(1 << 4);
-    _delay_ms(10);
-    PORTB |= (1 << 4);
+	// Reset display
+	PORTB &= ~(1 << 4);
+	_delay_ms(10);
+	PORTB |= (1 << 4);
 
-    // Initialize display
-    writeCommands(INIT_DISPLAY, sizeof(INIT_DISPLAY));
-    writeCommands(SETUP_FULL_DRAW, sizeof(SETUP_FULL_DRAW));
+	// Initialize display
+	writeCommands(INIT_DISPLAY, sizeof(INIT_DISPLAY));
+	writeCommands(SETUP_FULL_DRAW, sizeof(SETUP_FULL_DRAW));
 
-    // Draw background
-    PORTB |= (1 << 5);
-    writeCommands(BACKGROUND, sizeof(BACKGROUND));
+	// Draw background
+	PORTB |= (1 << 5);
+	writeCommands(BACKGROUND, sizeof(BACKGROUND));
 
 	USB_Init();
 }
@@ -69,8 +69,8 @@ void EVENT_USB_Device_ControlRequest(void)
 }
 
 void writeCommands(const uint8_t *cmd, int n) {
-    while(n--) {
-        SPDR = pgm_read_byte_near(cmd++);
-        while (!(SPSR & (1 << SPIF)));
-    }
+	while(n--) {
+		SPDR = pgm_read_byte_near(cmd++);
+		while (!(SPSR & (1 << SPIF)));
+	}
 }
