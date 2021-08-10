@@ -2,8 +2,8 @@
 #include <avr/wdt.h>
 #include <avr/power.h>
 #include <avr/interrupt.h>
-#include <commands.h>
-#include <LUFA/Drivers/USB/USB.h>
+#include "commands.h"
+#include "LUFA/Drivers/USB/USB.h"
 
 #define DISPLAY_STATS_BMREQUEST 0x80
 #define DISPLAY_STATS_BMREQUEST_TYPE (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE) // 0x21

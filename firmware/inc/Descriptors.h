@@ -1,6 +1,6 @@
 /* Includes: */
-#include <LUFA/Drivers/USB/USB.h>
 #include <avr/pgmspace.h>
+#include "LUFA/Drivers/USB/USB.h"
 
 /* Type Defines: */
 /** Type define for the device configuration descriptor structure. This must be defined in the
