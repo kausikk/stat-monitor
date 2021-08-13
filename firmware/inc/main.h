@@ -10,6 +10,11 @@
 #define READ_STATS_BMREQUEST 0x81
 #define READ_STATS_BMREQUEST_TYPE (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE) // 0xA1
 
+#define RESET_DELAY_MS 5
+#define RESET_PIN PORTB4
+#define DC_PIN PORTB5
+
 void SetupHardware(void);
 void EVENT_USB_Device_ControlRequest(void);
 void writeCommands(const uint8_t *cmd, int n);
+inline static void transfer(uint8_t data);

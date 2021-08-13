@@ -1,7 +1,12 @@
+# software ignores
+software/bin/
+software/obj/
+
 # firmware ignores
 firmware/build/
 
 # Kicad .gitignore
+pcb/plots/
 # Temporary files
 *.000
 *.bak

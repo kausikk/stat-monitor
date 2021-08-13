@@ -2,9 +2,9 @@ import usb.core
 import usb.util
 
 SEARCH_PARAMS = {'idVendor': 0x03EB, 'idProduct': 0x204F}
-MSG = 'abcdefgh'
 DISPLAY_STATS_REQUEST = [0x21, 0x80]
 READ_STATS_REQUEST = [0xA1, 0x81]
+MSG = 'abcdefgh'
 
 dev = usb.core.find(**SEARCH_PARAMS)
 assert dev is not None

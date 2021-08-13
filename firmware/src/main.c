@@ -12,29 +12,29 @@ int main(void)
 
 void SetupHardware(void)
 {
-    /* Disable watchdog if enabled by bootloader/fuses */
+    // Disable watchdog if enabled by bootloader/fuses
     MCUSR &= ~(1 << WDRF);
     wdt_disable();
-    /* Disable clock division */
+    // Disable clock division
     clock_prescale_set(clock_div_1);
 
-    // Initialize SPI
-    DDRB = 0b00110111;
-    PORTB = (1 << 4);
-    SPCR = 0b01010000;
+    // Set PORTB pins and initialize SPI
+    DDRB = _BV(DDB5) | _BV(DDB4) | _BV(DDB2) | _BV(DDB1) | _BV(DDB0);
+    PORTB = _BV(RESET_PIN);
+    SPCR = _BV(SPE) | _BV(MSTR);
 
     // Reset display
-    PORTB &= ~(1 << 4);
-    _delay_ms(10);
-    PORTB |= (1 << 4);
+    PORTB &= ~_BV(RESET_PIN);
+    _delay_ms(RESET_DELAY_MS);
+    PORTB |= _BV(RESET_PIN);
 
     // Initialize display
     writeCommands(INIT_DISPLAY, sizeof(INIT_DISPLAY));
     writeCommands(SETUP_FULL_DRAW, sizeof(SETUP_FULL_DRAW));
 
-    // Draw background
-    PORTB |= (1 << 5);
-    writeCommands(BACKGROUND, sizeof(BACKGROUND));
+    // Clear background
+    PORTB |= _BV(DC_PIN);
+    writeCommands(BACKGROUND, sizeof(BACKGROUND))
 
     USB_Init();
 }
@@ -69,8 +69,11 @@ void EVENT_USB_Device_ControlRequest(void)
 }
 
 void writeCommands(const uint8_t *cmd, int n) {
-    while(n--) {
-        SPDR = pgm_read_byte_near(cmd++);
-        while (!(SPSR & (1 << SPIF)));
-    }
+    while(n--)
+        transfer(pgm_read_byte_near(cmd++));
+}
+
+inline static void transfer(uint8_t data) {
+    SPDR = data;
+    while (!(SPSR & (1 << SPIF)));
 }

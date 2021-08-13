@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LibreHardwareMonitorLib">
+      <HintPath>LibreHardwareMonitorLib.dll</HintPath>
+    </Reference>
+    <Reference Include="HidSharp">
+      <HintPath>HidSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LibUsbDotNet">
+      <HintPath>LibUsbDotNet.LibUsbDotNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
