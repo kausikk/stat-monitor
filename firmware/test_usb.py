@@ -2,7 +2,7 @@ import usb.core
 import usb.util
 import time
 
-SEARCH_PARAMS = {'idVendor': 0x03EB, 'idProduct': 0x204F}
+SEARCH_PARAMS = {'idVendor': 0x1466, 'idProduct': 0x4034}
 DISPLAY_STATS_REQUEST = [0x21, 0x80]
 READ_STATS_REQUEST = [0xA1, 0x81]
 MSG = [0xA0, 0x12, 0x43, 0x56, 0x78, 0x90, 0, 0]
