@@ -1,6 +1,6 @@
 #include "main.h"
 
-static uint8_t prevReport[FIXED_CONTROL_ENDPOINT_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
+static uint8_t prevStats[FIXED_CONTROL_ENDPOINT_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 int main(void)
 {
@@ -13,14 +13,15 @@ int main(void)
 void SetupHardware(void)
 {
     // Disable watchdog if enabled by bootloader/fuses
-    MCUSR &= ~(1 << WDRF);
+    MCUSR &= ~_BV(WDRF);
     wdt_disable();
     // Disable clock division
     clock_prescale_set(clock_div_1);
 
-    // Set PORTB pins and initialize SPI
+    // Set PORTB pin directions and values
     DDRB = _BV(DDB5) | _BV(DDB4) | _BV(DDB2) | _BV(DDB1) | _BV(DDB0);
     PORTB = _BV(RESET_PIN);
+    // Initialize SPI
     SPCR = _BV(SPE) | _BV(MSTR);
 
     // Reset display
@@ -30,11 +31,10 @@ void SetupHardware(void)
 
     // Initialize display
     writeCommands(INIT_DISPLAY, sizeof(INIT_DISPLAY));
-    writeCommands(SETUP_FULL_DRAW, sizeof(SETUP_FULL_DRAW));
 
-    // Clear background
+    // Draw background
     PORTB |= _BV(DC_PIN);
-    writeCommands(BACKGROUND, sizeof(BACKGROUND))
+    writeCommands(BACKGROUND, sizeof(BACKGROUND));
 
     USB_Init();
 }
@@ -51,7 +51,7 @@ void EVENT_USB_Device_ControlRequest(void)
             if (USB_ControlRequest.bmRequestType == READ_STATS_BMREQUEST_TYPE)
             {
                 Endpoint_ClearSETUP();
-                Endpoint_Write_Control_Stream_LE(&prevReport, sizeof(prevReport));
+                Endpoint_Write_Control_Stream_LE(&prevStats, sizeof(prevStats));
                 Endpoint_ClearIN();
                 Endpoint_ClearStatusStage();
             }
@@ -59,21 +59,85 @@ void EVENT_USB_Device_ControlRequest(void)
         case DISPLAY_STATS_BMREQUEST:
             if (USB_ControlRequest.bmRequestType == DISPLAY_STATS_BMREQUEST_TYPE)
             {
+                uint8_t stats[FIXED_CONTROL_ENDPOINT_SIZE];
                 Endpoint_ClearSETUP();
-                Endpoint_Read_Control_Stream_LE(&prevReport, sizeof(prevReport));
+                Endpoint_Read_Control_Stream_LE(&stats, sizeof(stats));
                 Endpoint_ClearOUT();
                 Endpoint_ClearStatusStage();
+
+                PORTB &= ~_BV(DC_PIN);
+                writeCommands(SET_DIGIT_ROW_TOP, sizeof(SET_DIGIT_ROW_TOP));
+
+                const uint8_t *set_col_cmd = SET_DIGIT_COL;
+                for (uint8_t i=0; i < NUM_STATS; i++) {
+                    if (i == ROW_BOT_INDEX) {
+                        PORTB &= ~_BV(DC_PIN);
+                        writeCommands(SET_DIGIT_ROW_BOT, sizeof(SET_DIGIT_ROW_BOT));
+                    }
+                    if (stats[i] != prevStats[i]) {
+                        PORTB &= ~_BV(DC_PIN);
+                        writeCommands(set_col_cmd, SET_DIGIT_COL_LEN);
+                        set_col_cmd += SET_DIGIT_COL_LEN;
+
+                        PORTB |= _BV(DC_PIN);
+                        writeDigit(RECOVER_TENS_DIGIT(stats[i]));
+
+                        PORTB &= ~_BV(DC_PIN);
+                        writeCommands(set_col_cmd, SET_DIGIT_COL_LEN);
+                        set_col_cmd += SET_DIGIT_COL_LEN;
+
+                        PORTB |= _BV(DC_PIN);
+                        writeDigit(RECOVER_ONES_DIGIT(stats[i]));
+                        prevStats[i] = stats[i];
+                    } else
+                        set_col_cmd += SET_DIGIT_COL_LEN * 2;
+                }
             }
             break;
     }
 }
 
-void writeCommands(const uint8_t *cmd, int n) {
-    while(n--)
-        transfer(pgm_read_byte_near(cmd++));
+static void writeDigit(uint8_t digit) {
+    switch (digit) {
+        case DIGIT_0:
+            writeCommands(DIGITS, DIGIT_WIDTH);
+            break;
+        case DIGIT_1:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_1), DIGIT_WIDTH);
+            break;
+        case DIGIT_2:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_2), DIGIT_WIDTH);
+            break;
+        case DIGIT_3:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_3), DIGIT_WIDTH);
+            break;
+        case DIGIT_4:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_4), DIGIT_WIDTH);
+            break;
+        case DIGIT_5:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_5), DIGIT_WIDTH);
+            break;
+        case DIGIT_6:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_6), DIGIT_WIDTH);
+            break;
+        case DIGIT_7:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_7), DIGIT_WIDTH);
+            break;
+        case DIGIT_8:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_8), DIGIT_WIDTH);
+            break;
+        case DIGIT_9:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_9), DIGIT_WIDTH);
+            break;
+        case DIGIT_BLANK:
+            writeCommands(DIGITS + (DIGIT_WIDTH * DIGIT_BLANK), DIGIT_WIDTH);
+            break;
+    }
 }
 
-inline static void transfer(uint8_t data) {
-    SPDR = data;
-    while (!(SPSR & (1 << SPIF)));
+static void writeCommands(const uint8_t *cmd, int n) {
+    while(n--) {
+        SPDR = pgm_read_byte_near(cmd++);
+        while (!(SPSR & (1 << SPIF)));
+    }
 }

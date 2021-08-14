@@ -10,11 +10,16 @@
 #define READ_STATS_BMREQUEST 0x81
 #define READ_STATS_BMREQUEST_TYPE (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE) // 0xA1
 
+#define NUM_STATS 6
+#define ROW_BOT_INDEX 3
 #define RESET_DELAY_MS 5
 #define RESET_PIN PORTB4
 #define DC_PIN PORTB5
 
+#define RECOVER_TENS_DIGIT(d) (d >> 4)
+#define RECOVER_ONES_DIGIT(d) (d & 0x0F)
+
 void SetupHardware(void);
 void EVENT_USB_Device_ControlRequest(void);
-void writeCommands(const uint8_t *cmd, int n);
-inline static void transfer(uint8_t data);
+static void writeCommands(const uint8_t *cmd, int n);
+static void writeDigit(uint8_t digit);
