@@ -1,7 +1,5 @@
 #include "main.h"
 
-static uint8_t prevStats[FIXED_CONTROL_ENDPOINT_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
-
 int main(void)
 {
     SetupHardware();
@@ -45,6 +43,7 @@ void SetupHardware(void)
  */
 void EVENT_USB_Device_ControlRequest(void)
 {
+    static uint8_t prevStats[FIXED_CONTROL_ENDPOINT_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
     switch (USB_ControlRequest.bRequest)
     {
         case READ_STATS_BMREQUEST:
@@ -65,27 +64,35 @@ void EVENT_USB_Device_ControlRequest(void)
                 Endpoint_ClearOUT();
                 Endpoint_ClearStatusStage();
 
+                // Setup display to draw top row
                 PORTB &= ~_BV(DC_PIN);
                 writeCommands(SET_DIGIT_ROW_TOP, sizeof(SET_DIGIT_ROW_TOP));
 
                 const uint8_t *set_col_cmd = SET_DIGIT_COL;
                 for (uint8_t i=0; i < NUM_STATS; i++) {
                     if (i == ROW_BOT_INDEX) {
+                        // Setup display to draw bottom row
                         PORTB &= ~_BV(DC_PIN);
                         writeCommands(SET_DIGIT_ROW_BOT, sizeof(SET_DIGIT_ROW_BOT));
                     }
                     if (stats[i] != prevStats[i]) {
+                        // Setup display to draw in tens column
                         PORTB &= ~_BV(DC_PIN);
                         writeCommands(set_col_cmd, SET_DIGIT_COL_LEN);
+                        // Increment column
                         set_col_cmd += SET_DIGIT_COL_LEN;
 
+                        // Draw tens digit
                         PORTB |= _BV(DC_PIN);
                         writeDigit(RECOVER_TENS_DIGIT(stats[i]));
 
+                        // Setup display to draw in ones column
                         PORTB &= ~_BV(DC_PIN);
                         writeCommands(set_col_cmd, SET_DIGIT_COL_LEN);
+                        // Increment column
                         set_col_cmd += SET_DIGIT_COL_LEN;
 
+                        // Draw ones digit
                         PORTB |= _BV(DC_PIN);
                         writeDigit(RECOVER_ONES_DIGIT(stats[i]));
                         prevStats[i] = stats[i];
@@ -98,6 +105,7 @@ void EVENT_USB_Device_ControlRequest(void)
 }
 
 static void writeDigit(uint8_t digit) {
+    // Lookup table for digit
     switch (digit) {
         case DIGIT_0:
             writeCommands(DIGITS, DIGIT_WIDTH);
@@ -136,6 +144,7 @@ static void writeDigit(uint8_t digit) {
 }
 
 static void writeCommands(const uint8_t *cmd, int n) {
+    // Read commands from PROGMEM and write to SPI
     while(n--) {
         SPDR = pgm_read_byte_near(cmd++);
         while (!(SPSR & (1 << SPIF)));
